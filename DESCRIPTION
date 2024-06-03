@@ -1,0 +1,22 @@
+Package: SWATreadR
+Type: Package
+Title: Read and write SWAT+ input and output files.
+Version: 0.1.0.9000
+Authors@R: 
+    person("Christoph", "Schürz", , "c.schuerz@posteo.org", 
+           role = c("aut", "cre"), 
+           comment = c(ORCID = '0000-0002-7204-5828'))
+Maintainer: Christoph Schürz <c.schuerz@posteo.org>
+Description: `SWATreadR` consists of two main functions; `read_swat` to read any
+    SWAT+ input or output file and 'write_swat` to write any SWAT+ input file.
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    data.table (>= 1.14.6),
+    dplyr (>= 1.1.4),
+    purrr (>= 1.0.2),
+    stringr (>= 1.5.0),
+    tibble (>= 3.2.1),
+    tidyselect (>= 1.2.0)
+RoxygenNote: 7.2.3

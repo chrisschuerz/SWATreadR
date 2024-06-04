@@ -127,63 +127,6 @@ read_tbl2 <- function(file_path, def_names, par_names, id_num = NULL) {
   return(tbl)
 }
 
-#' Read the n column of a tabular SWAT+ input file which are defined by the
-#' column positions `id_col_sel`. This is useful if e.g. last columns with
-#' description cause issues with reading due to blanks in the description text.
-#'
-#' @param file_path Path of the SWAT+ input file.
-#' @param col_names (optional) Character column names vector.
-#' @param n_skip Number of header rows to skip. Default is 1.
-#' @param id_col_sel Numeric vector which defines the column positions that are
-#'   returned in the table.
-#' @param id_num ID vector to define the columns which are numerical values.
-#'
-#' @returns The SWAT+ management.sch input file as a tibble.
-#'
-#' @importFrom data.table fread
-#' @importFrom dplyr bind_rows bind_cols mutate %>%
-#' @importFrom purrr map map_chr map_df
-#' @importFrom stringr str_replace_all str_trim str_split
-#' @importFrom tibble as_tibble
-#'
-#' @keywords internal
-#'
-read_tbl_n <- function(file_path, col_names = NULL, n_skip = 1,
-                       id_col_sel = NULL, id_num = NULL) {
-  if (is.null(col_names)) {
-    col_names <- fread(file_path, skip = n_skip, nrows = 1, header = F) %>%
-      unlist(.) %>%
-      unname(.) %>%
-      add_suffix_to_duplicate(.)
-    if (!is.null(id_col_sel)) {
-      col_names <- col_names[id_col_sel]
-    }
-  }
-
-  file_line <- fread(file_path, skip = n_skip + 1, sep = NULL, sep2 = NULL,
-                     header = FALSE) %>%
-    unlist(.) %>%
-    unname(.) %>%
-    str_trim(.) %>%
-    str_replace_all(., '\t', ' ') %>%
-    str_split(., '[:space:]+')
-
-  if (!is.null(id_col_sel)) {
-    file_line <- map(file_line, ~ .x[id_col_sel])
-  }
-
-  tbl <- file_line %>%
-    map(., unlist) %>%
-    map(., ~ as_mtx_null(.x, length(file_line[[1]]))) %>%
-    map_df(., ~ as_tibble(.x, .name_repair = ~ col_names))
-
-  if(!is.null(id_num)) {
-    tbl[,id_num] <- map_df(tbl[,id_num], as.numeric)
-  }
-
-  return(tbl)
-}
-
 #' Read a SWAT+ connecitivity (*.con) input file.
 #'
 #' @param file_path Path of the SWAT+ input file.

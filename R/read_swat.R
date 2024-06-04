@@ -1,4 +1,3 @@
-
 #' Read SWAT+ input and output files.
 #'
 #' @param file_path Path to the SWAT+ file.
@@ -75,9 +74,10 @@ lookup_read_type <- function(file_name) {
     'chandeg.con'       = list(type = 'con', n_skip = 1, has_unit = FALSE),
     'channel-lte.cha'   = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
     'chem_app.ops'      = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
-    'cntable.lum'       = list(type = 'tbln', n_skip = 1, has_unit = FALSE),
+    'cntable.lum'       = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
     'codes.bsn'         = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
-    'cons_practice.lum' = list(type = 'tbln', n_skip = 1),
+    'cons_practice.lum' = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
+    # 'cons_practice.lum' = list(type = 'tbln', id_col_sel = 1:3, id_num = 2:3),
     'exco.con'          = list(type = 'con', n_skip = 1, has_unit = FALSE),
     'fertilizer.frt'    = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
     'field.fld'         = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
@@ -129,7 +129,7 @@ lookup_read_type <- function(file_name) {
     'print.prt'           = list(type = 'not'),
     'res_rel.dtl'         = list(type = 'not'),
     'reservoir.con'       = list(type = 'con'),
-    'reservoir.res'       = list(type = 'tbl'),
+    'reservoir.res'       = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
     'rout_unit.con'       = list(type = 'con'),
     "rout_unit.def"       = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
     'rout_unit.ele'       = list(type = 'tbl', n_skip = 1, has_unit = FALSE),

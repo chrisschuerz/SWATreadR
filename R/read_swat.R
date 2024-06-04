@@ -77,7 +77,6 @@ lookup_read_type <- function(file_name) {
     'cntable.lum'       = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
     'codes.bsn'         = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
     'cons_practice.lum' = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
-    # 'cons_practice.lum' = list(type = 'tbln', id_col_sel = 1:3, id_num = 2:3),
     'exco.con'          = list(type = 'con', n_skip = 1, has_unit = FALSE),
     'fertilizer.frt'    = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
     'field.fld'         = list(type = 'tbl', n_skip = 1, has_unit = FALSE),

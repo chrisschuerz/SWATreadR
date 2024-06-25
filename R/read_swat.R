@@ -27,7 +27,10 @@ read_swat <- function(file_path) {
                      par_names = read_type$par_names,
                      id_num = read_type$id_num)
   } else if (read_type$type == 'con') {
-    tbl <- read_con_file(file_path)
+    tbl <- read_con(file_path)
+  } else if (read_type$type == 'line') {
+    tbl <- read_linewise(file_path,
+                         col_names = read_type$col_names)
   } else if (read_type$type == 'not') {
     stop("'", file_name, "' is not implemented yet!")
   }
@@ -98,7 +101,9 @@ lookup_read_type <- function(file_name) {
     'initial.res'       = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
     'irr.ops'           = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
     'landuse.lum'       = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
-    'ls_unit.def'       = list(type = 'not'), #*** add value when write
+    'ls_unit.def'       = list(type = 'line',
+                               col_names = c('id', 'name', 'area', 'elem_tot', 'elements_*'),
+                               n_skip = 2),
     'ls_unit.ele'       = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
     'lum.dtl'           = list(type = 'not'),
     'management.sch'    = list(type = 'tbl2',
@@ -130,7 +135,9 @@ lookup_read_type <- function(file_name) {
     'reservoir.con'       = list(type = 'con'),
     'reservoir.res'       = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
     'rout_unit.con'       = list(type = 'con'),
-    "rout_unit.def"       = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
+    "rout_unit.def"       = list(type = 'line',
+                                 col_names = c('id', 'name', 'elem_tot', 'elements_*'),
+                                 n_skip = 2),
     'rout_unit.ele'       = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
     'rout_unit.rtu'       = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
     'salt_aqu.ini'        = list(type = 'not'),

@@ -142,7 +142,7 @@ read_tbl2 <- function(file_path, def_names, par_names, id_num = NULL) {
 #'
 #' @keywords internal
 #'
-read_con_file <- function(file_path) {
+read_con <- function(file_path) {
   obj_names <- c("id", "name", "gis_id", "area", "lat", "lon", "elev",
                  "obj_id", "wst", "cst", "ovfl", "rule", "out_tot")
   con_names <- c("obj_typ", "obj_id", "hyd_typ", "frac")
@@ -190,40 +190,61 @@ read_con_file <- function(file_path) {
   return(con_tbl)
 }
 
-#' Add a running ID to duplicated names
+#' Read the n column of a tabular SWAT+ input file which are defined by the
+#' column positions `id_col_sel`. This is useful if e.g. last columns with
+#' description cause issues with reading due to blanks in the description text.
 #'
-#' @param col_name Character vector of column names
+#' @param file_path Path of the SWAT+ input file.
+#' @param col_names (optional) Character column names vector.
+#' @param n_skip Number of header rows to skip. Default is 1.
 #'
-#' @returns the `col_name` character vector with IDs for duplicated names
+#' @returns The SWAT+ management.sch input file as a tibble.
 #'
-#' @keywords internal
+#' @importFrom data.table fread
+#' @importFrom dplyr bind_rows bind_cols mutate %>%
+#' @importFrom purrr map map_df map_lgl map_int
+#' @importFrom stringr str_replace str_replace_all str_trim str_split
+#' @importFrom tibble as_tibble
 #'
-add_suffix_to_duplicate <- function(col_name){
-  dupl <- table(col_name) %>%
-    .[. > 1]
+#' @export
+#'
+read_linewise <- function(file_path, col_names = NULL, n_skip = 1) {
+  if (is.null(col_names)) {
+    col_names <- fread(file_path, skip = n_skip, nrows = 1, header = F) %>%
+      unlist(.) %>%
+      unname(.) %>%
+      add_suffix_to_duplicate(.)
 
-  if(length(dupl > 0)) {
-    for(i in 1:length(dupl)) {
-      col_name[col_name == names(dupl[i])] <-
-        paste0(names(dupl[i]), c('', 1:(dupl[i]-1)))
-    }
+    col_names[length(col_names)] <- paste0(col_names[length(col_names)], '_*')
   }
 
-  return(col_name)
-}
+  file_line <- fread(file_path, skip = n_skip + 1, sep = NULL, sep2 = NULL,
+                     header = FALSE) %>%
+    unlist(.) %>%
+    unname(.) %>%
+    str_trim(.) %>%
+    str_replace_all(., '\t', ' ') %>%
+    str_split(., '[:space:]+')
 
-#' Transform x to a matrix with n columns and fill up with NA values
-#'
-#' @param x character vector or NULL
-#' @param n Number of elements
-#'
-#' @keywords internal
-#'
-as_mtx_null <- function(x, n) {
-  if(is.null(x)) {
-    matrix(rep(NA_character_, 7), ncol = n)
+  max_elems <- max(map_int(file_line, length))
+
+  if(length(col_names) > max_elems) {
+    col_names <- col_names[1:max_elems]
+  } else if (length(col_names) < max_elems) {
+    col_name_rep <- col_names[length(col_names)]
+    id_add <- as.character(1:(max_elems - length(col_names) + 1))
+    col_name_rep <- str_replace(col_name_rep, '\\*$', id_add)
+    col_names <- c(col_names[1:(length(col_names) - 1)], col_name_rep)
   } else {
-    matrix(x, nrow = n) %>%
-      t(.)
+    col_names <- str_replace(col_names, '\\*$', '')
   }
+
+  tbl <- file_line %>%
+    map(., ~ as_mtx_null(.x, max_elems)) %>%
+    map_df(., ~ as_tibble(.x, .name_repair = ~ col_names))
+
+  col_num <- map_lgl(tbl, is_num)
+  tbl[,col_num] <- map_df(tbl[,col_num], as.numeric)
+
+  return(tbl)
 }

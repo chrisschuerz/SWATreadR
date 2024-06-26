@@ -63,6 +63,121 @@ pivot_con_wide <- function(con_tbl) {
   }
 }
 
+#' Convert the elements columns in SWAT input format into vectors of individual
+#' integer values
+#'
+#' @param tbl SWAT+ input table which has the columns elem_tot and following
+#'   elements columns.
+#'
+#' @returns The `tbl` where the columns `elem_tot` and `elements_*` are replaced
+#'   by a list column with integer vectors providing all individual element IDs.
+#'
+#' @importFrom dplyr select %>%
+#' @importFrom purrr map map_chr pmap
+#' @importFrom stringr str_replace_all
+#' @importFrom tidyselect starts_with
+#'
+#' @export
+#'
+elements_to_vector <- function(tbl) {
+  if(!all(c('elem_tot', 'elements_1') %in% names(tbl))) {
+    stop("Table must contain the columns 'elem_tot' and 'elements_1, elements_2, etc...")
+  }
+  elements <- tbl %>%
+    select(starts_with('elements_')) %>%
+    pmap(., c) %>%
+    map(., as.character) %>%
+    map(., ~ paste(.x, collapse = ',')) %>%
+    map_chr(., ~ str_replace_all(.x, ',-', ':')) %>%
+    paste0('c(', ., ')') %>%
+    map(., ~ eval(parse(text=.x)))
+
+  tbl <- select(tbl, -starts_with('elem'))
+  tbl$elements <- elements
+
+  return(tbl)
+}
+
+#' Convert the elements list column into the columns elem_tot and elements_*
+#' which are the default SWAT+ format.
+#' integer values
+#'
+#' @param tbl SWAT+ input table which has the list column elements.
+#'
+#' @returns The `tbl` where the list column `elements` is converted into the
+#'   columns `elem_tot` and `elements_*`.
+#'
+#' @importFrom dplyr bind_cols select %>%
+#' @importFrom purrr list_rbind map
+#'
+#' @export
+#'
+vector_to_elements <- function(tbl) {
+  if(!'elements' %in% names(tbl)) {
+    if(!typeof(tbl$elements) == 'list') {
+      stop("Table must contain the list column 'elements'.")
+    }
+  }
+  elements <- tbl$elements %>%
+    map(., ~ values_to_elements(.x)) %>%
+    list_rbind()
+
+  elem_tot <- apply(elements, 1, sum_elements)
+
+  tbl <- tbl %>%
+    select(-elements) %>%
+    bind_cols(., elem_tot = elem_tot, elements)
+
+  return(tbl)
+}
+
+#' Convert the information on available runs for the simulated variables into
+#' strings that are printed
+#'
+#' @param tbl overview table that provides meta data for all simulation runs for
+#'   all variables saved in the data bases
+#'
+#' @importFrom dplyr %>%
+#' @importFrom purrr map map2 map2_chr
+#' @keywords internal
+#'
+values_to_elements <- function(vals) {
+  vals <- sort(vals)
+  diff_vals <- diff(vals)
+
+  end_seq   <- unique(c(vals[diff_vals != 1], vals[length(vals)]))
+  start_seq <- unique(c(vals[1], vals[which(diff_vals != 1) + 1]))
+
+  map2(start_seq, end_seq, ~build_element_sequence(.x, .y)) %>%
+    unlist() %>%
+    as_tibble_row(., .name_repair = ~ paste0('elements_', 1:length(.)))
+}
+
+#' Build the element value sequence for a pair of start and end value.
+#'
+#' @param strt Numeric start value of sequence
+#' @param end  Numeric end value of sequence
+#'
+#' @keywords internal
+#'
+build_element_sequence <- function(strt, end) {
+  if(strt == end) {
+    strt
+  } else {
+    c(strt, - end)
+  }
+}
+
+#' Sum the elements which are not NA
+#'
+#' @param elem Element entries.
+#'
+#' @keywords internal
+#'
+sum_elements <- function(elem) {
+  sum(!is.na(elem))
+}
+
 #' Identify whether all values of a vector are numeric or not
 #'
 #' @param x Character vector

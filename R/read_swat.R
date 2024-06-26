@@ -30,7 +30,8 @@ read_swat <- function(file_path) {
     tbl <- read_con(file_path)
   } else if (read_type$type == 'line') {
     tbl <- read_linewise(file_path,
-                         col_names = read_type$col_names)
+                         col_names = read_type$col_names,
+                         n_skip = read_type$n_skip)
   } else if (read_type$type == 'not') {
     stop("'", file_name, "' is not implemented yet!")
   }
@@ -137,7 +138,7 @@ lookup_read_type <- function(file_name) {
     'rout_unit.con'       = list(type = 'con'),
     "rout_unit.def"       = list(type = 'line',
                                  col_names = c('id', 'name', 'elem_tot', 'elements_*'),
-                                 n_skip = 2),
+                                 n_skip = 1),
     'rout_unit.ele'       = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
     'rout_unit.rtu'       = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
     'salt_aqu.ini'        = list(type = 'not'),

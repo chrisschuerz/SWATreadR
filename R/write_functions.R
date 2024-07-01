@@ -10,11 +10,16 @@
 #' @importFrom dplyr %>%
 #' @importFrom purrr map_int map2_df
 #' @importFrom readr write_lines
-#' @importFrom stringr str_remove str_replace str_replace_all
+#' @importFrom stringr str_detect str_remove str_replace str_replace_all
 #'
 #' @keywords internal
 #'
-write_tbl <- function(tbl, file_path, fmt) {
+write_tbl <- function(tbl, file_path, fmt, add_lines = NULL) {
+  if (str_detect(fmt[length(fmt)], '\\*\\*')) {
+    fmt_rep <- str_remove(fmt[length(fmt)], '\\*\\*')
+    fmt <- c(fmt[1:length(fmt) - 1], rep(fmt_rep, ncol(tbl) - length(fmt) + 1))
+  }
+
   if(length(fmt) < ncol(tbl)) {
     # To account for optional description columns
     fmt <- c(fmt, rep('%s', ncol(tbl) - length(fmt)))
@@ -36,7 +41,7 @@ write_tbl <- function(tbl, file_path, fmt) {
 
   file_head <- paste('SWAT+ input file written with SWATreadR at', Sys.time())
 
-  input_file <- c(file_head, col_names, file_lines)
+  input_file <- c(file_head, add_lines, col_names, file_lines)
 
   write_lines(input_file, file_path)
 }

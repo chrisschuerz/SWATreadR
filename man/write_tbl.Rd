@@ -4,7 +4,7 @@
 \alias{write_tbl}
 \title{Write SWAT+ input file which has a tabular structure.}
 \usage{
-write_tbl(tbl, file_path, fmt)
+write_tbl(tbl, file_path, fmt, add_lines = NULL)
 }
 \arguments{
 \item{tbl}{SWAT input table in tibble (data.frame) format.}

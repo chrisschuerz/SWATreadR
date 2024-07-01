@@ -23,7 +23,16 @@ write_swat <- function(tbl, file_path, overwrite = FALSE) {
   if(is.null(write_type[[1]])) {
     stop("File with the name '", file_name, "' is not supported!")
   } else if (write_type$type == 'tbl') {
-    write_tbl(tbl = tbl, file_path = file_path, fmt = write_type$fmt)
+    if(!is.null(write_type$add_lines)) {
+      if(write_type$add_lines == 'n_row') {
+        write_type$add_lines <- as.character(nrow(tbl))
+      }
+    } else {
+      write_type$add_lines <- NULL
+    }
+
+    write_tbl(tbl = tbl, file_path = file_path, fmt = write_type$fmt,
+              add_lines = write_type$add_lines)
   } else if (write_type$type == 'tbl2') {
     write_tbl2(tbl = tbl,
                file_path = file_path,
@@ -103,7 +112,7 @@ lookup_write_type <- function(file_name) {
     'initial.res'       = list(type = 'tbl', fmt = c('%-16s', rep('%16s', 5))),
     'irr.ops'           = list(type = 'tbl', fmt = c('%-16s', rep('%12.5f', 7))),
     'landuse.lum'       = list(type = 'tbl', fmt = c('%-20s', rep('%16s', 13))),
-    'ls_unit.def'       = list(type = 'not'), #*** add value when write
+    'ls_unit.def'       = list(type = 'tbl', fmt = c('%8d', '%16s', '%12.5f', '%8d', '%10d**'), add_lines = 'n_row'),
     'ls_unit.ele'       = list(type = 'tbl', fmt = c('%8d', '%-16s', '%16s', '%10d', rep('%12.5f', 3))),
     'lum.dtl'           = list(type = 'not'),
     'management.sch'    = list(type = 'tbl2',
@@ -131,7 +140,7 @@ lookup_write_type <- function(file_name) {
     'reservoir.con'       = list(type = 'con'),
     'reservoir.res'       = list(type = 'tbl', fmt = c('%8d', '%-16s', rep('%16s', 4))),
     'rout_unit.con'       = list(type = 'con'),
-    "rout_unit.def"       = list(type = 'tbl', fmt = c('%8d', '%16s', rep('%8d', 2))),
+    "rout_unit.def"       = list(type = 'tbl', fmt = c('%8d', '%16s', '%8d', '%10d**')),
     'rout_unit.ele'       = list(type = 'tbl', fmt = c('%8d', '%-16s', '%12s', '%8d', '%12.5f', '%16d')),
     'rout_unit.rtu'       = list(type = 'tbl', fmt = c('%8d', '%-16s', rep('%16s', 4))),
     'salt_aqu.ini'        = list(type = 'not'),

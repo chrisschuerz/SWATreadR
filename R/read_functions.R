@@ -30,13 +30,13 @@ read_tbl <- function(file_path, col_names = NULL, col_types = NULL, n_skip = 1,
       col_names <- c(col_names, col_names_add)
       warning("Number of columns of '", basename(file_path),"' > column names.\n",
               "Column names ", paste(col_names_add, collapse = ', '),
-              ' were assigned to columns at the end.')
+              ' were assigned to columns at the end.\n')
     } else if (ncol(tbl) < length(col_names)) {
       col_names_rmv <- col_names[(ncol(tbl) + 1):length(col_names)]
       col_names <- col_names[1:ncol(tbl)]
       warning("Number of columns of '", basename(file_path),"' < column names.\n",
               "Column names ", paste(col_names_rmv, collapse = ', '),
-              ' were removed.')
+              ' were removed.\n')
     }
 
     names(tbl) <- col_names

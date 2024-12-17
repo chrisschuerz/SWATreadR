@@ -20,7 +20,12 @@ read_swat <- function(file_path) {
   if(is.null(read_type[[1]])) {
     stop("File with the name '", file_name, "' is not supported!")
   } else if (read_type$type == 'tbl') {
-    tbl <- read_tbl(file_path, n_skip = read_type$n_skip)
+    tbl <- read_tbl(file_path = file_path,
+                    col_names = read_type$col_names,
+                    col_types = read_type$col_types,
+                    n_skip    = read_type$n_skip,
+                    has_unit  = read_type$has_unit,
+                    keep_attr = read_type$keep_attr)
   } else if (read_type$type == 'tbl2') {
     tbl <- read_tbl2(file_path = file_path,
                      def_names = read_type$def_names,
@@ -63,6 +68,8 @@ lookup_read_type <- function(file_name) {
     file_name <- 'out_without_units'
   } else if (file_sfx %in% c('txt', 'out')) {
     file_name <- 'out_with_units'
+  } else if (file_sfx %in% c('pcp', 'tmp', 'hmd', 'slr', 'wnd')) {
+    file_name <- 'weather_input'
   }
 
   read_lookup <- list(
@@ -172,7 +179,9 @@ lookup_read_type <- function(file_name) {
     'wnd.cli'             = list(type = 'tbl', n_skip = 1, has_unit = FALSE),
     # Output files
     'out_with_units'      = list(type = 'tbl', n_skip = 1, has_unit = TRUE),
-    'out_without_units'      = list(type = 'tbl', n_skip = 1, has_unit = TRUE)
+    'out_without_units'   = list(type = 'tbl', n_skip = 1, has_unit = TRUE),
+    'weather_input'       = list(type = 'tbl', n_skip = 3, col_names = c('year', 'yday'),
+                                 has_unit = FALSE, keep_attr = TRUE)
     )
   return(read_lookup[[file_name]])
 }

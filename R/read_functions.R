@@ -14,7 +14,7 @@
 #' @keywords internal
 #'
 read_tbl <- function(file_path, col_names = NULL, col_types = NULL, n_skip = 1,
-                     has_unit = FALSE) {
+                     has_unit = FALSE, keep_attr = FALSE) {
   if (file.exists(file_path)) {
     tbl <- fread(file_path, skip = n_skip + 1 + has_unit, header = FALSE)
     if (is.null(col_names)) {
@@ -41,6 +41,12 @@ read_tbl <- function(file_path, col_names = NULL, col_types = NULL, n_skip = 1,
 
     names(tbl) <- col_names
     tbl <- tibble(tbl)
+
+    if(keep_attr & n_skip > 1) {
+      tbl_attr <- readLines(file_path, n = n_skip)
+      attr(tbl, 'header') <- tbl_attr[2:n_skip]
+    }
+
   } else {
     if (is.null(col_names)) {
       stop("File '", basename(file_path), "' does not exist and no 'col_names' ",

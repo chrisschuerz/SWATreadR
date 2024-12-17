@@ -26,13 +26,19 @@ write_swat <- function(tbl, file_path, overwrite = FALSE) {
     if(!is.null(write_type$add_lines)) {
       if(write_type$add_lines == 'n_row') {
         write_type$add_lines <- as.character(nrow(tbl))
+        write_type$write_col_names <- TRUE
+      } else if (write_type$add_lines == 'header') {
+        write_type$add_lines <- attr(tbl, 'header')
+        write_type$write_col_names <- FALSE
       }
     } else {
       write_type$add_lines <- NULL
+      write_type$write_col_names <- TRUE
     }
 
     write_tbl(tbl = tbl, file_path = file_path, fmt = write_type$fmt,
-              add_lines = write_type$add_lines)
+              add_lines = write_type$add_lines,
+              write_col_names = write_type$write_col_names)
   } else if (write_type$type == 'tbl2') {
     write_tbl2(tbl = tbl,
                file_path = file_path,
@@ -73,6 +79,8 @@ lookup_write_type <- function(file_name) {
     file_name <- 'out_without_units'
   } else if (file_sfx %in% c('txt', 'out')) {
     file_name <- 'out_with_units'
+  } else if (file_sfx %in% c('pcp', 'tmp', 'hmd', 'slr', 'wnd')) {
+    file_name <- 'weather_input'
   }
 
   write_lookup <- list(
@@ -166,7 +174,8 @@ lookup_write_type <- function(file_name) {
     'weather-sta.cli'     = list(type = 'tbl', fmt = c('%-16s', rep('%16s', 8))),
     'weather-wgn.cli'     = list(type = 'not'),
     'wetland.wet'         = list(type = 'tbl', fmt = c('%8s', '%-16s', rep('%16s', 5))),
-    'wnd.cli'             = list(type = 'tbl', fmt = '%s')
+    'wnd.cli'             = list(type = 'tbl', fmt = '%s'),
+    'weather_input'       = list(type = 'tbl', fmt = c('%-4d', '%8d', '%7.3f**'), add_lines = 'header')
   )
   return(write_lookup[[file_name]])
 }

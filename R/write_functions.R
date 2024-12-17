@@ -14,7 +14,7 @@
 #'
 #' @keywords internal
 #'
-write_tbl <- function(tbl, file_path, fmt, add_lines = NULL) {
+write_tbl <- function(tbl, file_path, fmt, add_lines = NULL, write_col_names = TRUE) {
   if (str_detect(fmt[length(fmt)], '\\*\\*')) {
     fmt_rep <- str_remove(fmt[length(fmt)], '\\*\\*')
     fmt <- c(fmt[1:length(fmt) - 1], rep(fmt_rep, ncol(tbl) - length(fmt) + 1))
@@ -27,13 +27,22 @@ write_tbl <- function(tbl, file_path, fmt, add_lines = NULL) {
 
   tbl <- map2_df(tbl, fmt, ~ sprintf(.y, .x))
 
-  fmt_names <- fmt %>%
-    str_remove(., '\\.[:digit:]+') %>%
-    str_replace(., 'f|d', 's')
+  if(write_col_names) {
+    fmt_names <- fmt %>%
+      str_remove(., '\\.[:digit:]+') %>%
+      str_replace(., 'f|d', 's')
 
-  col_names <- colnames(tbl) %>%
-    sprintf(fmt_names, .) %>%
-    paste(., collapse = '  ')
+    # col_names_unique <- a
+    #   colnames(tbl) %>%
+    #   str_remove(., '\\_[:digit:]+') %>%
+    #     unique(.)
+
+    col_names <- colnames(tbl) %>%
+      sprintf(fmt_names, .) %>%
+      paste(., collapse = '  ')
+  } else {
+    col_names <- NULL
+  }
 
   file_lines <- tbl %>%
     apply(., 1, paste, collapse = '  ') %>%

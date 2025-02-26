@@ -42,6 +42,8 @@ read_tbl <- function(file_path, col_names = NULL, col_types = NULL, n_skip = 1,
     names(tbl) <- col_names
     tbl <- tibble(tbl)
 
+    if(is.null(keep_attr)) keep_attr <- FALSE
+
     if(keep_attr & n_skip > 1) {
       tbl_attr <- readLines(file_path, n = n_skip)
       attr(tbl, 'header') <- tbl_attr[2:n_skip]

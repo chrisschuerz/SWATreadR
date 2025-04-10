@@ -111,9 +111,7 @@ read_tbl2 <- function(file_path, def_names, par_names, id_num = NULL) {
   pos_end[no_entry] <- length(file_line) + 1
 
   par_tbl <- map2(pos_start, pos_end, ~ file_line[.x:.y]) %>%
-    map(., unlist) %>%
-    map(., ~ as_mtx_null(.x, n_par)) %>%
-    map(., ~ as_tibble(.x, .name_repair = ~ par_names))
+    map(., ~ bind_mtx_list(.x, n_par, par_names))
 
   n_op <- map_int(par_tbl, nrow)
 

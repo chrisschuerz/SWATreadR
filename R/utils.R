@@ -226,3 +226,24 @@ as_mtx_null <- function(x, n) {
       t(.)
   }
 }
+
+#' Bind the read lines on tbl2 parameter tables into tables
+#'
+#' @param x list of vectors from read lines
+#' @param n Number of parameters
+#' @param pnames Vector of parameter names
+#'
+#' @returns A tibble for each list of vectors
+#'
+#' @importFrom dplyr %>%
+#' @importFrom purrr map
+#' @importFrom tibble as_tibble
+#'
+#' @keywords internal
+#'
+bind_mtx_list <- function(x, n, pnames) {
+  x %>%
+    map(., ~as_mtx_null(.x, n)) %>%
+    do.call(rbind, .) %>%
+    as_tibble(., .name_repair = ~ pnames)
+}
